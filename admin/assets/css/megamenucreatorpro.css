@@ -100,15 +100,21 @@ i.unicode-fas:before {
 }
 .mmcp-sidebars {
     display: none;
-    min-height: 500px;
 }
 .mmcp-sidebars > .mmcp-sidebar {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.64);
     position: fixed;
     color: #444;
     padding: 30px;
-    font-size: 2em;
+    font-size: 1em;
     text-align: center;
+}
+.jsgrid-grid-body {
+    #height: auto !important;
+    overflow-y: visible;
+}
+.jsgrid-grid-header {
+    overflow-y: visible;
 }
 .mmcp-sidebar.mmcp-left {
     position: fixed;
@@ -116,9 +122,11 @@ i.unicode-fas:before {
     left: 0;
     bottom: 0;
     min-width: 270px;
+    min-height: 500px;
     width: 90%;
     z-index: 9999;
     background: #fff;
+    overflow-y: scroll;
 }
 #asideOverlay{
     display: none;
@@ -175,4 +183,13 @@ i.unicode-fas:before {
     border-top-color: #C1C1C1;
     border-right-color: #71AFFF;
     border-bottom-color: #C1C1C1;    
+}
+.mmcp-hide {
+    display: none;
+}
+.row-botton {
+    margin: 20px 0 0;
+}
+.mmcp_select select{
+    height: auto;
 }

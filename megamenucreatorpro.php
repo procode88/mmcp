@@ -62,6 +62,9 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 			add_action( 'plugins_loaded', array( $this, 'wg_load_textdomain' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts_css' ), 11 );
 			add_action( 'admin_menu', array( $this, 'wp_admin_menus' ));
+			if ($this->is_ajax_action('add-menu-item') && isset($_REQUEST['mmcp-menu'])) {
+				add_action('admin_init', array($this, 'load_nav_menus'));
+			}
 		}
 
 		public function load_controller() {
@@ -77,10 +80,30 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 		 * @return void
 		 */
 		public function load_classes() {
-			include_once(self::$plugin_path.'admin/includes/mmcp_ajax.php');
+			if (is_admin()) {
+				include_once(self::$plugin_path.'admin/includes/mmcp_ajax.php');
+				include_once(self::$plugin_path.'admin/includes/class_mmcp_walker_admin_menu.php');
+			}
 			//$get_layout = (array) get_post_meta(12, 'wpmm_layout', true);
 			//echo '<pre>';print_r($get_layout);die;
 		}
+
+		/**
+		 * Load nav menus page functionality.
+		 * 
+		 * @since 1.7.2 Added AJAX check for help tabs.
+		 * @since 1.6.0 Restructured collapse/expand buttons.
+		 * @since 1.2.5 Moved collapse/expand buttons to the primary action hook.
+		 * @since 1.1.1 Moved nav menu specific action and filter hooks from the constructor.
+		 * @since 1.1.0
+		 * 
+		 * @access public
+		 * @return void
+		 */
+		public function load_nav_menus()
+		{
+			add_filter('wp_edit_nav_menu_walker', array($this, 'wp_edit_nav_menu_walker'), 99);
+		}		
 
 		/**
 		 * Add menu to admin
@@ -142,6 +165,39 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 			$this->define( 'MMCP_PLUGIN_PATH', self::$plugin_path );
 			$this->define( 'MMCP_VERSION', self::$version );*/
 		}
+
+		/**
+		 * Check to see if an AJAX action is being executed.
+		 * 
+		 * @since 1.4.0 Made function static.
+		 * @since 1.1.2
+		 * 
+		 * @access public static
+		 * @param  string  $action Action to check for.
+		 * @return boolean         True if the action is being executed.
+		 */
+		public function is_ajax_action($action)
+		{
+			if (!defined('DOING_AJAX') || !DOING_AJAX) return false;
+
+			$current_action = (isset($_GET['action'])) ? $_GET['action'] : '';
+			$current_action = (empty($current_action) && isset($_POST['action'])) ? $_POST['action'] : $current_action;
+
+			return ($action == $current_action);
+		}
+
+		/**
+		 * Filter the Walker class used when adding nav menu items.
+		 * 
+		 * @since 1.1.0
+		 * 
+		 * @access public
+		 * @return string Class name of the Walker to use.
+		 */
+		public function wp_edit_nav_menu_walker()
+		{
+			return 'MMCP_Walker_Nav_Menu_Edit';
+		}		
 
 		/**
 		 * Define constant if not already set.
