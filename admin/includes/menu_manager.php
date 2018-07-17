@@ -182,7 +182,6 @@ if (!class_exists('Menu_Manager'))
 	        if (empty($nav_menu_selected_id) && !isset($_GET['menu']) && is_nav_menu($recently_edited))
 	            $nav_menu_selected_id = $recently_edited;
 
-
 	        if (empty($nav_menu_selected_id) && !empty($nav_menus) && !$add_new_screen) {
 	            // if we have no selection yet, and we have menus, set to the first one in the list.
 	            $nav_menu_selected_id = $nav_menus[0]->term_id;
@@ -204,7 +203,7 @@ if (!class_exists('Menu_Manager'))
 	        $users_data = array('udata' => $this->get_all_user_data());
 
 			$nav_menus_l10n = array(
-				'oneThemeLocationNoMenus' => $one_theme_location_no_menus,
+				'oneThemeLocationNoMenus' => '',
 				'moveUp'       => __( 'Move up one' ),
 				'moveDown'     => __( 'Move down one' ),
 				'moveToTop'    => __( 'Move to the top' ),

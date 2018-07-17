@@ -45,10 +45,10 @@ if (!class_exists('MMCP_Ajax'))
 		 * @param String $title
 		 * @return Array
 		 */
-		private function get_data_pages_post($callback, $title) {
+		private function get_data_pages_post_categories_tags($callback, $title) {
 			global $wp_meta_boxes;
 	        wp_nav_menu_setup();
-	        wp_initial_nav_menu_meta_boxes();		
+	        wp_initial_nav_menu_meta_boxes();
 			$continue = true;
 			$result = array();
 			if (!$callback || !$title) return $result;
@@ -62,10 +62,11 @@ if (!class_exists('MMCP_Ajax'))
 						foreach ( $wp_meta_boxes['nav-menus']['side'][$key] as $box ) {
 							if (false == $box || !$box['title'])
 								continue;
-
-
-							if ($box['callback'] == $callback && $box['title'] == $title) {
+							if ($box['callback'] == $callback && $callback == 'wp_nav_menu_item_post_type_meta_box' && $box['title'] == $title) {
 								$result = $this->_get_data_pages_post($box);
+								break;
+							} elseif( $box['callback'] == $callback && $callback == 'wp_nav_menu_item_taxonomy_meta_box' && $box['title'] == $title) {
+								$result = $this->_get_data_categories_tags($box);
 								break;
 							}
 						}
@@ -78,42 +79,164 @@ if (!class_exists('MMCP_Ajax'))
 		}
 
 		/**
-	     * Parse Data
-	     * @param object $data
+		 * @param object $item   Menu item data object.
+		 * @return array
+		 */
+		private function build_hidden_input($item) {
+			global $_nav_menu_placeholder;
+			$output = '';
+			$_nav_menu_placeholder = ( 0 > $_nav_menu_placeholder ) ? intval($_nav_menu_placeholder) - 1 : -1;
+			$possible_object_id = isset( $item->post_type ) && 'nav_menu_item' == $item->post_type ? $item->object_id : $_nav_menu_placeholder;
+			//$possible_db_id = ( ! empty( $item->ID ) ) && ( 0 < $possible_object_id ) ? (int) $item->ID : 0;
+			$possible_db_id = $item->ID;
+
+			$menu_item = array('menu_item' => array($possible_object_id => 
+				array(
+					'menu-item-object-id' => esc_attr( $item->object_id ),
+					'menu-item-db-id' => $possible_db_id,
+					'menu-item-object' => esc_attr( $item->object ),
+					'menu-item-parent-id' => esc_attr( $item->menu_item_parent ),
+					'menu-item-type' => esc_attr( $item->type ),
+					'menu-item-title' => esc_attr( $item->title ),
+					'menu-item-url' => esc_attr( $item->url ),
+					'menu-item-target' => esc_attr( $item->target ),
+					'menu-item-attr_title' => esc_attr( $item->attr_title ),
+					'menu-item-classes' => esc_attr( implode( ' ', $item->classes ) ),
+					'menu-item-xfn' => esc_attr( $item->xfn )
+				)
+			));
+
+			return $menu_item;
+		}
+
+		/**
+	     * Build Data response
+	     * @param object $element
+	     * @param array $_authorIds
 	     * @return array
 		 */
-		private function parse_data($data) {
-			
+		private function build_data_response($element, &$_authorIds) {
+			if (!is_object($element)) return array();
+			$id = $element->ID;
+			$input_hidden = $this->build_hidden_input($element);
+			$item = array(
+				'id' => $id, 
+				'item_select' => false, 
+				'title' => $element->title, 
+				'item_slug' => '',
+				'input_hidden' => $input_hidden
+			);
+			if($element->type === 'post_type') {
+				$author_name = get_the_author_meta('display_name', $element->post_author);
+				$item['author'] = ($element->post_type == 'page')? $author_name : (int)$element->post_author;
+				$item['public_date'] = $element->post_date;
+				$item['item_slug'] = $element->post_name;
+			} elseif($element->type === 'taxonomy') {
+				$original_title = get_term_field( 'name', $element->object_id, $element->object, 'raw' );
+				$item['description'] = $element->description;
+				$item['item_slug'] = $element->slug;
+			} elseif($element->type === 'custom') {
+
+			} elseif($element->type === 'post_type_archive') {
+
+			}
+
+			if ($element->post_type !== 'page' && is_array($_authorIds) && (!count($_authorIds) || !in_array($element->post_author, $_authorIds))) {
+				array_push($_authorIds, $element->post_author);
+				array_push($this->authors_arr, array('id' => $element->post_author, 'name' => $author_name));
+			}
+			return $item;
+		}
+
+		/**
+	     * Parse Data
+	     * @param object $elements
+	     * @return array
+		 */
+		private function parse_data($elements) {
 			$_data = array();
 			$_authorIds = array();
-			if($data) {
-				foreach ($data as $post_data){
-					$author_name = get_the_author_meta('display_name', $post_data->post_author);
-					$item = array(
-						'id' => $post_data->ID, 
-						'item_select' => false, 
-						'title' => $post_data->post_title, 
-						'item_slug' => $post_data->post_name,
-						'author' => ($post_data->post_type == 'page')? $author_name : (int)$post_data->post_author,
-						'public_date' => $post_data->post_date
-					);
-					if ($post_data->post_type !== 'page' && (!count($_authorIds) || !in_array($post_data->post_author, $_authorIds))) {
-						array_push($_authorIds, $post_data->post_author);
-						array_push($this->authors_arr, array('id' => $post_data->post_author, 'name' => $author_name));
-					}
+			if(count($elements)) {
+				$parent_field = 'post_parent';
+				/*
+				 * Need to display in hierarchical order.
+				 * Separate elements into two buckets: top level and children elements.
+				 * Children_elements is two dimensional array, eg.
+				 * Children_elements[10][] contains all sub-elements whose parent is 10.
+				 */
+				$top_level_elements = array();
+				$children_elements  = array();
+				foreach ( $elements as $e) {
+					if ( empty( $e->$parent_field ) )
+						$top_level_elements[] = $e;
+					else
+						$children_elements[ $e->$parent_field ][] = $e;
+				}
+
+				foreach ($top_level_elements as $post_data){
+					$id = $post_data->ID;
+					$item = $this->build_data_response($post_data, $_authorIds);
 					array_push($_data, $item);
+					unset($item);
+					foreach ( $children_elements[ $id ] as $child ){
+						$item = $this->build_data_response($child, $_authorIds);
+						array_push($_data, $item);
+						unset($item);
+					}
 				}
 			}
 			return $_data;
 		}
+		/**
+		 * Get All data catgories and tags
+		 * @param object $box
+		 * @return array
+		 */
+		private function _get_data_categories_tags($box) {
+			$reponse = array();
+			$taxonomy_name = $box['args']->name;
+			// Paginate browsing for large numbers of objects.
+			$per_page = 100;
+			$pagenum = 1;
+			$offset = 0 ;
+
+			$args = array(
+				'child_of' => 0,
+				'exclude' => '',
+				'hide_empty' => false,
+				'hierarchical' => 1,
+				'include' => '',
+				'number' => $per_page,
+				'offset' => $offset,
+				'order' => 'ASC',
+				'orderby' => 'name',
+				'pad_counts' => false,
+			);
+
+			$terms = get_terms( $taxonomy_name, $args );
+
+			if ( ! $terms || is_wp_error($terms) ) {
+				return $reponse;
+			}
+			$db_fields = false;
+			if ( is_taxonomy_hierarchical( $taxonomy_name ) ) {
+				$db_fields = array( 'parent' => 'parent', 'id' => 'term_id' );
+			}
+
+			$walker = new Walker_Nav_Menu_Checklist( $db_fields );
+			$args['walker'] = $walker;
+			$reponse = $this->parse_data(array_map('wp_setup_nav_menu_item', $terms));
+			return array('data' => $reponse, 'num_pages' => $num_pages, 'item_per_page' => $per_page);
+
+		}
 
 		/**
-		 * Get All data
+		 * Get All data pages and post
 		 * @param object $box
 		 * @return array
 		 */
 		private function _get_data_pages_post($box) {
-			global $_nav_menu_placeholder, $nav_menu_selected_id;
+			global $_nav_menu_placeholder;
 			$reponse = array();
 			$post_type_name = $box['args']->name;
 			$per_page = 100;
@@ -209,13 +332,13 @@ if (!class_exists('MMCP_Ajax'))
 			if (isset($_REQUEST['tab'])) {
 				switch ($_REQUEST['tab']) {
 					case 'Pages':
-						$data = $this->get_data_pages_post('wp_nav_menu_item_post_type_meta_box', 'Pages');
+						$data = $this->get_data_pages_post_categories_tags('wp_nav_menu_item_post_type_meta_box', 'Pages');
 						$response['data'] = $data['data'];
 						$response['num_pages'] = $data['num_pages'];
 						$response['item_per_page'] = $data['item_per_page'];					
 						break;
 					case 'Posts':
-						$data = $this->get_data_pages_post('wp_nav_menu_item_post_type_meta_box', 'Posts');
+						$data = $this->get_data_pages_post_categories_tags('wp_nav_menu_item_post_type_meta_box', 'Posts');
 						$response['data'] = $data['data'];
 						$response['num_pages'] = $data['num_pages'];
 						$response['item_per_page'] = $data['item_per_page'];
@@ -225,8 +348,16 @@ if (!class_exists('MMCP_Ajax'))
 						}
 						break;
 					case 'Categories':
+						$data = $this->get_data_pages_post_categories_tags('wp_nav_menu_item_taxonomy_meta_box', 'Categories');
+						$response['data'] = $data['data'];
+						$response['num_pages'] = $data['num_pages'];
+						$response['item_per_page'] = $data['item_per_page'];
 						break;
 					case 'Tags':
+						$data = $this->get_data_pages_post_categories_tags('wp_nav_menu_item_taxonomy_meta_box', 'Tags');
+						$response['data'] = $data['data'];
+						$response['num_pages'] = $data['num_pages'];
+						$response['item_per_page'] = $data['item_per_page'];					
 						break;
 					case 'Customlinks':
 						break;

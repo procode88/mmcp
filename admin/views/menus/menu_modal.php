@@ -12,17 +12,20 @@ if ( ! defined( 'ABSPATH' ) ) {
   <div class="modal-dialog" role="document">
 	<div class="modal-content">
 	  <div class="modal-header">
-		<h5 class="modal-title" id="mmcpModalLabel">Menu Detail</h5>
+		<h5 class="modal-title" id="mmcpModalLabel"><?php _e('Delete Parmanently')?></h5>
+		<input type="hidden" name="menu_item_id" value="" />
+		<?php wp_nonce_field( 'mmcp-delete-item_menu', 'mmcp_delete_item_menu_nonce' ); ?>
 		<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 		  <span aria-hidden="true">&times;</span>
 		</button>
 	  </div>
 	  <div class="modal-body">
-	  	<div class="load_content"><div class="wpmm-item-loading"></div></div>
+	  	<p><?php _e('Are you sure about this ?') ?></p>
+	  	<p class="item_name_category"></p>
 	  </div>
 	  <div class="modal-footer">
-		<button type="button" class="btn btn-secondary" data-dismiss="modal"><?php _e('Close') ?></button>
-		<button type="button" class="btn btn-primary"><?php _e('Save')?></button>
+		<button type="button" class="btn btn-secondary" data-dismiss="modal"><?php _e('No') ?></button>
+		<button type="button" class="btn btn-primary btn_delete_item_menu"><?php _e('Yes')?></button>
 	  </div>
 	</div>
   </div>

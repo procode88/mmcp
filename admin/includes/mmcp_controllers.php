@@ -131,6 +131,31 @@ if (!class_exists('MMCP_Controllers'))
 						}
 					}
 					break;
+					case 'delete-menu-item':
+						check_admin_referer( 'mmcp-delete-item_menu', 'mmcp_delete_item_menu_nonce' );
+						$menu_item_id = (int) $_REQUEST['menu_item_id'];
+						if ( is_nav_menu_item( $menu_item_id ) && wp_delete_post( $menu_item_id, true ) )
+							$this->messages[] = '<div id="message" class="updated notice is-dismissible"><p>' . __('The menu item has been successfully deleted.') . '</p></div>';
+						break;
+					case 'delete':
+						check_admin_referer( 'mmcp-delete-nav_menu', 'mmcp_delete_menu_nonce' );
+						$nav_menu_selected_id = (int) $_REQUEST['menu_id'];
+						if ( is_nav_menu( $nav_menu_selected_id ) ) {
+							$deletion = wp_delete_nav_menu( $nav_menu_selected_id );
+						} else {
+							// Reset the selected menu.
+							$nav_menu_selected_id = 0;
+							unset( $_REQUEST['menu_id'] );
+						}
+
+						if ( ! isset( $deletion ) )
+							break;
+
+						if ( is_wp_error( $deletion ) )
+							$this->messages[] = '<div id="message" class="error notice is-dismissible"><p>' . $deletion->get_error_message() . '</p></div>';
+						else
+							$this->messages[] = '<div id="message" class="updated notice is-dismissible"><p>' . __( 'The menu has been successfully deleted.' ) . '</p></div>';
+						break;						
 			}
 		}
 

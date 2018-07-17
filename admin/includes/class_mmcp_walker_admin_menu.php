@@ -58,7 +58,7 @@ if (!class_exists('MMCP_Walker_Nav_Menu_Edit'))
 		 * @param array  $args   Not used.
 		 * @param int    $id     Not used.
 		 */
-		public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+		public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) { 
 			global $_wp_nav_menu_max_depth;
 			$_wp_nav_menu_max_depth = $depth > $_wp_nav_menu_max_depth ? $depth : $_wp_nav_menu_max_depth;
 
@@ -108,18 +108,18 @@ if (!class_exists('MMCP_Walker_Nav_Menu_Edit'))
 					<div class="menu-item-bar">
 						<div class="menu-item-handle">
 							<span class="item-title">
-								<span class="menu-item-title"><?php echo esc_html( $title ); ?>
-								
+								<span class="menu-item-title">
+									<?php echo esc_html( $title ); ?>
 								</span> 
-								<span class="is-submenu" <?php echo $submenu_text; ?>><?php _e( 'sub item' ); ?>
-									
+								<span class="is-submenu" <?php echo $submenu_text; ?>>
+									<?php _e( 'sub item' ); ?>
 								</span>
+								<span class="button-edit" data-title="<?php _e($title) ?>" title="<?php _e('Edit Item') ?>"><i class="far fa-edit"></i> </span>
 							</span>
-							<span class="button-edit" data-title="<?php _e($title) ?>" title="<?php _e('Edit Item') ?>"><i class="far fa-edit"></i> </span>	                
-							</span>						
 							<span class="item-controls">
 								<span class="item-type"><?php echo esc_html( $item->type_label ); ?></span>
 							</span>
+							<input class="menu-item-title" type="hidden" name="menu-item-title[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $title ); ?>" />	
 							<input class="menu-item-data-db-id" type="hidden" name="menu-item-db-id[<?php echo $item_id; ?>]" value="<?php echo $item_id; ?>" />
 							<input class="menu-item-data-object-id" type="hidden" name="menu-item-object-id[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $item->object_id ); ?>" />
 							<input class="menu-item-data-object" type="hidden" name="menu-item-object[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $item->object ); ?>" />

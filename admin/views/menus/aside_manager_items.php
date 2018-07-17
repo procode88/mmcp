@@ -15,6 +15,7 @@
 				<div class="col-12 aside-title">
 					<h5 class="aside-title" id="mmcpAsideLabel"><?php _e('Setting Type Of Item Menu')?></h5>
 					<input type="hidden" name="ajaxtab-check" value="<?php echo wp_create_nonce( "mmcp_check_ajax_tab_data_security" )?>" />
+					<?php wp_nonce_field('add-menu_item', 'menu-settings-column-nonce'); ?>
 				</div>
 			</div>
 			<div class="row aside-content">
@@ -68,6 +69,10 @@
 					<div class="row">
 						<div class="col-12 ">
 							<div class="row-botton">
+								<div class="box_spinner">
+									
+								</div>
+								<span class="spinner" style="float: none;"></span>
 								<button type="button" class="btn btn-primary addtomenu"><?php _e('Add To Menu')?></button>
 								<button type="button" class="btn btn-secondary mmcp-close">
 									<?php _e('Close') ?>

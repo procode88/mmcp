@@ -69,8 +69,9 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 
 		public function load_controller() {
 	 		if (is_admin()) {
-				require_once(ABSPATH . 'wp-admin/includes/nav-menu.php');
-				include_once(self::$plugin_path.'admin/includes/mmcp_controllers.php');
+				include_once(ABSPATH . 'wp-admin/includes/nav-menu.php');
+				if(isset($_REQUEST['page']) && $_REQUEST['page'] == 'megamenucreatorpro')
+					include_once(self::$plugin_path.'admin/includes/mmcp_controllers.php');
 	 		}
 
 		}
@@ -90,12 +91,6 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 
 		/**
 		 * Load nav menus page functionality.
-		 * 
-		 * @since 1.7.2 Added AJAX check for help tabs.
-		 * @since 1.6.0 Restructured collapse/expand buttons.
-		 * @since 1.2.5 Moved collapse/expand buttons to the primary action hook.
-		 * @since 1.1.1 Moved nav menu specific action and filter hooks from the constructor.
-		 * @since 1.1.0
 		 * 
 		 * @access public
 		 * @return void
@@ -133,7 +128,9 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
             	wp_enqueue_style('megamenucreatorpro_boostrap', self::$plugin_url .'bootstrap/css/bootstrap.min.css', false, '4.0.0');            	
             	wp_enqueue_style('megamenucreatorpro_fontawesome', self::$plugin_url .'fonts/awesome-5.1.0/all.css', false, '5.1.0');
 	       		wp_enqueue_style( 'megamenucreatorpro_jsgrid_css', self::$plugin_url . 'admin/assets/libs/jsgrid/jsgrid.min.css', '1.5.3' );            	
-	       		wp_enqueue_style( 'megamenucreatorpro_jsgrid_theme_css', self::$plugin_url . 'admin/assets/libs/jsgrid/jsgrid-theme.min.css', '1.5.3' ); 	       		
+	       		wp_enqueue_style( 'megamenucreatorpro_jsgrid_theme_css', self::$plugin_url . 'admin/assets/libs/jsgrid/jsgrid-theme.min.css', '1.5.3' );
+			    wp_register_style( 'mmcp-jquery-ui', 'http://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css' );
+			    wp_enqueue_style( 'mmcp-jquery-ui' );
 	       		wp_enqueue_style( 'megamenucreatorpro_css', self::$plugin_url . 'admin/assets/css/megamenucreatorpro.css', false, self::$version );
 		        wp_enqueue_script( 'megamenucreatorpro_boostrap_js', self::$plugin_url.'bootstrap/js/bootstrap.min.js', array(
 		            'jquery'
@@ -148,7 +145,9 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 		            'jquery',
 		            'jquery-ui-core',
 		            'jquery-ui-sortable',
-		            'jquery-ui-accordion'
+		            'jquery-ui-accordion',
+		            'jquery-ui-datepicker',
+		            'wp-util'
 		        ), self::$version );
             }
 		}

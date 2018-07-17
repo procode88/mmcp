@@ -43,9 +43,42 @@
  */
 jQuery(function($){
 	"use strict";
+	$('.delete-action a[class*="mmcp_delete_menu"]').on('click', function(event){
+		var item_id = $('input[id="menu"]').val(),
+			params = {
+				menu_id: item_id, 
+				action: 'delete'
+			};
+	    var template = wp.template('menu-form-delete');
+	    $('body').append(template({method: 'post', id: 'delete_menu', action: $('.menustruct > form[id="update-nav-menu"]').attr('action'), params: params}));
+	    $('form[id="delete_menu"]').submit();
+	});
+	$('[class*="modal-footer"] > .btn_delete_item_menu').on('click', function(event){
+		var item_id = $('input[type="hidden"][name="menu_item_id"]').val();
+		$('input[type="hidden"][name="menu_item_id"]').val('');
+		$('[id="menu-item-'+item_id+'"]').remove();
+		$('[id=mmcp_wrapperModal]').modal('hide');
+		/*$.post(ajaxurl+'?page=megamenucreatorpro', 
+			{
+				menu_item_id: item_id, 
+				action: 'delete-menu-item',
+				mmcp_delete_item_menu_nonce: $('input[type="hidden"][name="mmcp_delete_item_menu_nonce"]').val()
+			}, function(data){
+		});*/
+	});
 	$(".mmcp-menuwidget-layout").sidebar({side: 'left'});
 	$(".mmcp-manager-typeitem-menu").sidebar({side: 'left'});
-	$('.block-menustruct [class*=button-edit]').each(function(){
+	$('.block-menustruct [class*=delete_item_menu]').each(function(event){
+		$(this).on('click', function(){
+			$('[id=mmcp_wrapperModal]').modal('show');
+			var self = this, title = $(self).data('title'), menuitem = $(self).closest('li.menu-item'),
+				menu_id = $("input#menu").val(), menu_item_id = parseInt(menuitem.attr("id").match(/[0-9]+/)[0], 10);
+
+			$('input[type="hidden"][name="menu_item_id"]').val(menu_item_id);
+			$('.modal-body p[class*="item_name_category"]').text('Do you want to proceed delete item "'+title+'"?');
+		});
+	});
+	$('.block-menustruct [class*=edit_item_menu]').each(function(event){
 		$(this).on('click', function(){
 			var self = this, title = $(self).data('title'), menu_id = $("input#menu").val(), menuitem = $(self).closest('li.menu-item');
 			var menu_item_id = parseInt(menuitem.attr("id").match(/[0-9]+/)[0], 10);
@@ -136,6 +169,7 @@ jQuery(function($){
 
 	MyCheckboxField.prototype = new jsGrid.Field({
 		sorter: "number",
+		sorting: false,
 		align: "center",
 		autosearch: true,
 		itemTemplate: function(value) {
@@ -176,6 +210,32 @@ jQuery(function($){
 	});
 	jsGrid.fields.MyCheckboxField = MyCheckboxField;
 
+	function row_click(item) {
+		var self = this;
+    	if (item && item.event) {
+    		var element = item.event.currentTarget, indexItem = item.itemIndex, is_refresh = true;
+    		var checkbox = $(element).find('input[class*="custom_checkbox"]');
+    		if (checkbox) {
+    			if (checkbox.is(':checked')) {
+    				if(self.data[indexItem].item_select) {
+    					is_refresh = false;
+    				} else {
+						self.data[indexItem].item_select = true;
+    				}
+    			} else {
+    				if(self.data[indexItem].item_select) {
+    					self.data[indexItem].item_select = false;
+    				} else {
+    					is_refresh = false;
+    				}
+    			}
+    			if (is_refresh) {
+					self.refresh();
+    			}
+    		}
+    	}
+	}
+
 	$('.mmcp-manager-typeitem-menus a[data-toggle="tab"]').on('show.bs.tab', function(event){
 
 	}).on('shown.bs.tab', function(evet){
@@ -195,29 +255,7 @@ jQuery(function($){
 	                pageSize: 10,
 	                pageButtonCount: 5,
 	                rowClick: function(item) {
-	                	var self = this;
-	                	if (item && item.event) {
-	                		var element = item.event.currentTarget, indexItem = item.itemIndex, is_refresh = true;
-	                		var checkbox = $(element).find('input[class*="custom_checkbox"]');
-	                		if (checkbox) {
-	                			if (checkbox.is(':checked')) {
-	                				if(self.data[indexItem].item_select) {
-	                					is_refresh = false;
-	                				} else {
-										self.data[indexItem].item_select = true;
-	                				}
-	                			} else {
-	                				if(self.data[indexItem].item_select) {
-	                					self.data[indexItem].item_select = false;
-	                				} else {
-	                					is_refresh = false;
-	                				}
-	                			}
-	                			if (is_refresh) {
-									self.refresh();
-	                			}
-	                		}
-	                	}
+						row_click.call(this, item);
 	                },
 	                controller: {
 						loadData: function(filter) {
@@ -228,7 +266,9 @@ jQuery(function($){
 										return (!filter.id || client.id == filter.id)
 										 	&& (!filter.title || client.title.indexOf(filter.title) > -1)
 										 	&& (!filter.item_slug || client.item_slug.indexOf(filter.item_slug) > -1)
-										 	&& (!filter.author || client.author.indexOf(filter.author) > -1);
+										 	&& (!filter.author || client.author.indexOf(filter.author) > -1)
+										 	&& (!filter.public_date.from || new Date(client.public_date) >= filter.public_date.from)
+										 	&& (!filter.public_date.to || new Date(client.public_date) <= filter.public_date.to);
 									});
 							} else {
 								var d = $.Deferred();
@@ -268,6 +308,7 @@ jQuery(function($){
 						{ name: "title", title:"Title", type: "text", width: 150, align: 'left' },
 						{ name: "item_slug", title: "Item Slug", type: "text", width: 150, align: 'left' },
 						{ name: "author", title:"Author", type: "text", width: 100 },
+						{ name: "public_date", title:"Public Date", type: "myDateField", width: 100 },
 						{ type: "control", deleteButton: false, editButton: false, visible: true, css: "mmcp-hide" }                
 	                ]
 				});
@@ -283,6 +324,9 @@ jQuery(function($){
 	                autoload: true,
 	                pageSize: 10,
 	                pageButtonCount: 5,
+	                rowClick: function(item) {
+	                	row_click.call(this, item);
+	                },	                
 	                controller: {
 						loadData: function(filter) {
 							var self = this;
@@ -293,7 +337,9 @@ jQuery(function($){
 										return (!filter.id || client.id == filter.id)
 										 	&& (!filter.title || client.title.indexOf(filter.title) > -1)
 										 	&& (!filter.item_slug || client.item_slug.indexOf(filter.item_slug) > -1)
-										 	&& (!filter.author || client.author == filter.author);
+										 	&& (!filter.author || client.author == filter.author)
+										 	&& (!filter.public_date.from || new Date(client.public_date) >= filter.public_date.from)
+										 	&& (!filter.public_date.to || new Date(client.public_date) <= filter.public_date.to);										 	
 									});
 							} else {
 								var d = $.Deferred();
@@ -333,27 +379,206 @@ jQuery(function($){
 						{ name: "title", title:"Title", type: "text", width: 150, align: 'left' },
 						{ name: "item_slug", title: "Item Slug", type: "text", width: 150, align: 'left' },
 						{ name: "author", title:"Author", type: "select", css: 'mmcp_select', items: mmcp_users.udata, valueField: "id", textField: "name", width: 100 },
+						{ name: "public_date", title:"Public Date", type: "myDateField", width: 100 },
+						{ type: "control", deleteButton: false, editButton: false, visible: true, css: "mmcp-hide" }                
+	                ]
+				});
+			}else if(tab_name === 'Categories') {
+				$('#mmcpCategories').jsGrid({
+	                height: "auto",
+	                width: "100%",
+	                filtering: true,
+	                editing: false,
+	                inserting: false,
+	                sorting: true,
+	                paging: true,
+	                autoload: true,
+	                pageSize: 10,
+	                pageButtonCount: 5,
+	                rowClick: function(item) {
+	                	row_click.call(this, item);
+	                },
+	                controller: {
+						loadData: function(filter) {
+							var self = this;
+							console.log(filter, self.data);
+							if (filter && self.data.length) {
+								return $.grep(self.data, function(client) {
+									if (typeof filter.item_select === 'boolean') client.item_select = filter.item_select;
+										return (!filter.id || client.id == filter.id)
+										 	&& (!filter.title || client.title.indexOf(filter.title) > -1)
+										 	&& (!filter.item_slug || client.item_slug.indexOf(filter.item_slug) > -1);
+									});
+							} else {
+								var d = $.Deferred();
+								$.ajax({
+									url: ajaxurl,
+									method: 'POST',
+									data: {
+										action: 'mmcp_tab_data',
+										tab: tab_name,
+										mmcp_nonce: $('input[name="ajaxtab-check"]').val()				
+									},
+									beforeSend: function() {
+
+									},
+									success: function(data) {
+										var _data = JSON.parse(data.data);
+										console.log('success >>>', _data);
+									},
+									error: function() {
+										console.log('error >>>');
+										d.resolve([]);
+									}
+								}).done(function(response) {
+									var _data = JSON.parse(response.data);
+									console.log('done >>>', _data);
+									self.data = JSON.parse(JSON.stringify(_data.data));
+									d.resolve(_data.data);
+		                        });						
+								return d.promise();
+							}
+						},
+						data: []
+	                },
+	                fields: [
+	                	{ name: "item_select", title:"", type: "MyCheckboxField", width: 20, align: 'center' },
+						{ name: "id", title:"Id", type: "number", width: 40, align: 'center'},
+						{ name: "title", title:"Title", type: "text", width: 150, align: 'left' },
+						{ name: "item_slug", title: "Item Slug", type: "text", width: 150, align: 'left' },
+						{ type: "control", deleteButton: false, editButton: false, visible: true, css: "mmcp-hide" }                
+	                ]
+				});
+			} else if(tab_name === 'Tags') {
+				$('#mmcpTags').jsGrid({
+	                height: "auto",
+	                width: "100%",
+	                filtering: true,
+	                editing: false,
+	                inserting: false,
+	                sorting: true,
+	                paging: true,
+	                autoload: true,
+	                pageSize: 10,
+	                pageButtonCount: 5,
+	                rowClick: function(item) {
+	                	row_click.call(this, item);
+	                },
+	                controller: {
+						loadData: function(filter) {
+							var self = this;
+							console.log(filter, self.data);
+							if (filter && self.data.length) {
+								return $.grep(self.data, function(client) {
+									if (typeof filter.item_select === 'boolean') client.item_select = filter.item_select;
+										return (!filter.id || client.id == filter.id)
+										 	&& (!filter.title || client.title.indexOf(filter.title) > -1)
+										 	&& (!filter.item_slug || client.item_slug.indexOf(filter.item_slug) > -1);
+									});
+							} else {
+								var d = $.Deferred();
+								$.ajax({
+									url: ajaxurl,
+									method: 'POST',
+									data: {
+										action: 'mmcp_tab_data',
+										tab: tab_name,
+										mmcp_nonce: $('input[name="ajaxtab-check"]').val()				
+									},
+									beforeSend: function() {
+
+									},
+									success: function(data) {
+										var _data = JSON.parse(data.data);
+										console.log('success >>>', _data);
+									},
+									error: function() {
+										console.log('error >>>');
+										d.resolve([]);
+									}
+								}).done(function(response) {
+									var _data = JSON.parse(response.data);
+									console.log('done >>>', _data);
+									self.data = JSON.parse(JSON.stringify(_data.data));
+									d.resolve(_data.data);
+		                        });						
+								return d.promise();
+							}
+						},
+						data: []
+	                },
+	                fields: [
+	                	{ name: "item_select", title:"", type: "MyCheckboxField", width: 20, align: 'center' },
+						{ name: "id", title:"Id", type: "number", width: 40, align: 'center'},
+						{ name: "title", title:"Title", type: "text", width: 150, align: 'left' },
+						{ name: "item_slug", title: "Item Slug", type: "text", width: 150, align: 'left' },
 						{ type: "control", deleteButton: false, editButton: false, visible: true, css: "mmcp-hide" }                
 	                ]
 				});
 			}
 		}
 	});
+	function get_data_select(tab_select) {
+		var self = this;
+		self.tab_active = tab_select;
+		self.data = $(tab_select).jsGrid('option', 'data');
+		$.each(self.data, function(index, value){
+			if (value.item_select) {
+				value.item_select = false;
+				if(typeof value.input_hidden === 'object' && value.input_hidden.menu_item) {
+					$.extend(self.menu_item, value.input_hidden.menu_item);
+					self.ajax_valid = true;
+				}
+			}
+		});
+	}
 	$('button[class*="addtomenu"]').on('click', function(){
-		var tap_name = $('ul[id=typeItemTab] li > a.active').attr('href').split('#mmcp')[1], data = [];
-		switch(tap_name) {
+		var admin_ajax = $('input[name="menu-settings-column-nonce"]').val();
+		var menu_id = $('.group_menu input[type="hidden"][name="menu"]').val();
+		var menu_obj = {
+			tab_name: $('ul[id=typeItemTab] li > a.active').attr('href').split('#mmcp')[1],
+			tab_active: '',
+			data: [],
+			ajax_valid: false,
+			menu_item: {}
+		};
+		switch(menu_obj.tab_name) {
 			case 'Pages':
-				data = $('#mmcpPages').jsGrid('data');
+				var _get_data = get_data_select.bind(menu_obj, '#mmcpPages');
+				_get_data();
 				break;
 			case 'Posts':
-				data = $('#mmcpPosts').jsGrid('data');
+				var _get_data = get_data_select.bind(menu_obj, '#mmcpPosts');
+				_get_data();
 				break;
 			case 'Categories':
+				var _get_data = get_data_select.bind(menu_obj, '#mmcpCategories');
+				_get_data();
 				break;
 			case 'Tags':
+				var _get_data = get_data_select.bind(menu_obj, '#mmcpTags');
+				_get_data();
 				break;
 			case 'CustomLink':
 				break;
+		}
+		if (menu_obj.ajax_valid) {
+			$('.row-botton > .spinner').addClass('is-active');
+			var params = {
+					'action': 'add-menu-item',
+					'menu': menu_id,
+					'mmcp-menu': 1,
+					'menu-settings-column-nonce': admin_ajax,
+					'menu-item': menu_obj.menu_item
+			};
+			$.post( ajaxurl, params, function(menuMarkup) {
+				menuMarkup = $.trim( menuMarkup );
+				wpNavMenu.addMenuItemToBottom(menuMarkup, params);
+				$('.row-botton > .spinner').removeClass('is-active');
+				$(menu_obj.tab_active).jsGrid('refresh', menu_obj.data);
+				$(menu_obj.tab_active).jsGrid('clearFilter');
+				$(".mmcp-manager-typeitem-menu button.mmcp-close").trigger('click');
+			});
 		}
 	});
 });

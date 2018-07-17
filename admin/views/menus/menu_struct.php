@@ -58,7 +58,12 @@ if (empty($menu_items)) {
                 <?php } ?>
 
                 <span class="is-submenu"><?php if ($menu_items[$index]->menu_item_parent <> 0) _e('sub item'); ?></span>
-				<span class="button-edit" data-title="<?php _e($menu_items[$index]->title) ?>" title="<?php _e('Edit Item') ?>"><i class="far fa-edit"></i> </span>	                
+				<span class="button-edit edit_item_menu" data-title="<?php _e($menu_items[$index]->title) ?>" title="<?php _e('Edit Item') ?>">
+                    <i class="far fa-edit"></i>
+                </span>
+                <span class="button-edit delete_item_menu" data-title="<?php _e($menu_items[$index]->title) ?>" title="<?php _e('Delete Item') ?>">
+                    <i class="far fa-trash-alt"></i>
+                </span>
 				</span>
                 <span class="item-controls"> 
                     <span class="view_menu_id" style="display:none">#menu-item-<?php echo $menu_items[$index]->db_id; ?> </span>
@@ -66,6 +71,8 @@ if (empty($menu_items)) {
                     <!--span class="menu_sub_details" title="View Attributes">&nbsp;</span-->
                     <!--span data-attr-menu-item='<?php echo esc_attr( $menu_items[$index]->db_id ); ?>' class="delete_node" title="Delete this item">X</span-->
                 </span>
+                <input type="hidden" class="edit-menu-item-title" name="menu-item-title[<?php echo esc_attr( $menu_items[$index]->db_id ); ?>]" value="<?php echo esc_attr($menu_items[$index]->title); ?>">
+
                 <input class="menu-item-data-db-id" name="menu-item-db-id[<?php echo esc_attr( $menu_items[$index]->db_id ); ?>]" value="<?php echo esc_attr($menu_items[$index]->db_id); ?>" type="hidden">
                 <input class="menu-item-data-object-id" name="menu-item-object-id[<?php echo esc_attr( $menu_items[$index]->db_id ); ?>]" value="<?php echo esc_attr($menu_items[$index]->object_id); ?>" type="hidden">
 
