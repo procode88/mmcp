@@ -23,6 +23,7 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 		public static $plugin_basename;
 		public static $version;
 		public $settings;
+		protected $hook_suffix = 'toplevel_page_megamenucreatorpro';
 		
 		protected static $_instance = null;
 		
@@ -59,18 +60,38 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 		 */
 		private function init_hooks() {
 			add_action( 'wp_loaded', array($this, 'load_controller' ) );
-			add_action( 'plugins_loaded', array( $this, 'wg_load_textdomain' ) );
+			add_action( 'plugins_loaded', array( $this, 'mmcp_load_textdomain' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts_css' ), 11 );
+            add_action( 'admin_print_footer_scripts-'.$this->hook_suffix, array( $this, 'megamenucreatorpro_footer_scripts' ) );
+            add_action( 'admin_print_scripts-'.$this->hook_suffix, array( $this, 'megamenucreatorpro_scripts' ) );
+            add_action( 'admin_print_styles-'.$this->hook_suffix, array( $this, 'megamenucreatorpro_styles' ) );			
 			add_action( 'admin_menu', array( $this, 'wp_admin_menus' ));
 			if ($this->is_ajax_action('add-menu-item') && isset($_REQUEST['mmcp-menu'])) {
 				add_action('admin_init', array($this, 'load_nav_menus'));
 			}
 		}
 
+        public function megamenucreatorpro_footer_scripts( $hook ) {
+            do_action( 'admin_footer-widgets.php' );
+        }		
+
+        /**
+         * Added admin scripts, to support media script. Supporting form wp-4.8
+         */
+        public function megamenucreatorpro_scripts( $hook ) {
+            do_action( 'admin_print_scripts-widgets.php' );
+        }
+        /**
+         * Added admin style, to support media style. Supporting form wp-4.8
+         */
+        public function megamenucreatorpro_styles( $hook ) {
+            do_action( 'admin_print_styles-widgets.php' );
+        }		
+
 		public function load_controller() {
 	 		if (is_admin()) {
 				include_once(ABSPATH . 'wp-admin/includes/nav-menu.php');
-				if(isset($_REQUEST['page']) && $_REQUEST['page'] == 'megamenucreatorpro')
+				if(isset($_REQUEST['page']) && $_REQUEST['page'] == 'megamenucreatorpro') 
 					include_once(self::$plugin_path.'admin/includes/mmcp_controllers.php');
 	 		}
 
@@ -83,10 +104,9 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 		public function load_classes() {
 			if (is_admin()) {
 				include_once(self::$plugin_path.'admin/includes/mmcp_ajax.php');
+				include_once(self::$plugin_path.'admin/includes/mmcp_widget.class.php');
 				include_once(self::$plugin_path.'admin/includes/class_mmcp_walker_admin_menu.php');
 			}
-			//$get_layout = (array) get_post_meta(12, 'wpmm_layout', true);
-			//echo '<pre>';print_r($get_layout);die;
 		}
 
 		/**
@@ -122,9 +142,15 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 		 * admin enqueue script and css
 		 * @return void
 		 */
-		public function admin_enqueue_scripts_css() {
+		public function admin_enqueue_scripts_css($hook) {
             //
-            if (is_admin() && isset($_REQUEST['page']) && $_REQUEST['page'] == 'megamenucreatorpro') {
+            if ( isset($_REQUEST['page']) && $_REQUEST['page'] == 'megamenucreatorpro') {
+
+	            if ($hook === $this->hook_suffix){
+	                do_action( 'sidebar_admin_setup' );
+	                do_action( 'admin_enqueue_scripts', 'widgets.php' );
+	                do_action( 'admin_print_styles-widgets.php' );
+	            }            	
             	wp_enqueue_style('megamenucreatorpro_boostrap', self::$plugin_url .'bootstrap/css/bootstrap.min.css', false, '4.0.0');            	
             	wp_enqueue_style('megamenucreatorpro_fontawesome', self::$plugin_url .'fonts/awesome-5.1.0/all.css', false, '5.1.0');
 	       		wp_enqueue_style( 'megamenucreatorpro_jsgrid_css', self::$plugin_url . 'admin/assets/libs/jsgrid/jsgrid.min.css', '1.5.3' );            	
@@ -218,7 +244,7 @@ if ( !class_exists( 'Mega_Menu_Creator_Pro' ) ) {
 			return untrailingslashit( plugin_dir_path( __FILE__ ) );
 		}
 
-	    public function wg_load_textdomain()
+	    public function mmcp_load_textdomain()
 	    {
 	        load_plugin_textdomain('mmcp', false, dirname(self::$plugin_basename) . '/languages/');	
 	    }

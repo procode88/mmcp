@@ -72,7 +72,9 @@ if (empty($menu_items)) {
                     <!--span data-attr-menu-item='<?php echo esc_attr( $menu_items[$index]->db_id ); ?>' class="delete_node" title="Delete this item">X</span-->
                 </span>
                 <input type="hidden" class="edit-menu-item-title" name="menu-item-title[<?php echo esc_attr( $menu_items[$index]->db_id ); ?>]" value="<?php echo esc_attr($menu_items[$index]->title); ?>">
-
+                <?php if($menu_items[$index]->type == 'custom') {?>
+                    <input class="menu-item-url" type="hidden" name="menu-item-url[<?php echo $menu_items[$index]->db_id; ?>]" value="<?php echo $menu_items[$index]->url; ?>" />
+                <?php } ?>
                 <input class="menu-item-data-db-id" name="menu-item-db-id[<?php echo esc_attr( $menu_items[$index]->db_id ); ?>]" value="<?php echo esc_attr($menu_items[$index]->db_id); ?>" type="hidden">
                 <input class="menu-item-data-object-id" name="menu-item-object-id[<?php echo esc_attr( $menu_items[$index]->db_id ); ?>]" value="<?php echo esc_attr($menu_items[$index]->object_id); ?>" type="hidden">
 

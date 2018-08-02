@@ -78,6 +78,8 @@ if (!class_exists('MMCP_Walker_Nav_Menu_Edit'))
 				if ( $original_object ) {
 					$original_title = $original_object->labels->archives;
 				}
+			} elseif('custom' == $item->type) {
+
 			}
 
 			$classes = array(
@@ -120,6 +122,11 @@ if (!class_exists('MMCP_Walker_Nav_Menu_Edit'))
 								<span class="item-type"><?php echo esc_html( $item->type_label ); ?></span>
 							</span>
 							<input class="menu-item-title" type="hidden" name="menu-item-title[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $title ); ?>" />	
+							<?php
+								if('custom' == $item->type) {
+							?>
+							<input class="menu-item-url" type="hidden" name="menu-item-url[<?php echo $item_id; ?>]" value="<?php echo $item->url; ?>" />							
+							<?php } ?>
 							<input class="menu-item-data-db-id" type="hidden" name="menu-item-db-id[<?php echo $item_id; ?>]" value="<?php echo $item_id; ?>" />
 							<input class="menu-item-data-object-id" type="hidden" name="menu-item-object-id[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $item->object_id ); ?>" />
 							<input class="menu-item-data-object" type="hidden" name="menu-item-object[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $item->object ); ?>" />

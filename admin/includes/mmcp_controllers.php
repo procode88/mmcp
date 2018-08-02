@@ -95,7 +95,7 @@ if (!class_exists('MMCP_Controllers'))
 
 								wp_redirect( add_query_arg( array( 'menu' => $_nav_menu_selected_id ), admin_url( 'admin.php?page=megamenucreatorpro' ) ) );
 								exit();
-							}						
+							}
 						} else {
 							$this->messages[] = '<div id="message" class="error notice is-dismissible"><p>' . __( 'Please enter a valid menu name.' ) . '</p></div>';
 						}

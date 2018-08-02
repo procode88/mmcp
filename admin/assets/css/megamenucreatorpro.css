@@ -24,6 +24,17 @@ div.mmco-wrapper {
     text-align: right;
     float: right;
 }
+.mmcp-item-loading{
+    background-image: url(../images/loading.gif);
+    height: 20px;
+    width: 20px;
+    margin: auto;
+}
+.mmcp_widget_form .mmcp-item-loading{
+    float: right;
+    margin: 5px 5px 0;
+    display: none;
+}
 .block-menu-items #menu-management #nav-menu-header {
     padding: 10px 15px;
     margin: 0;
@@ -35,6 +46,12 @@ div.mmco-wrapper {
     padding: 0;
     overflow: hidden;
     background: #f5f5f5;
+}
+.block-menu-items #menu-management form.mmcp_widget_form {
+    background: transparent;
+}
+.block-menu-items #menu-management form.mmcp_widget_form label {
+    margin-bottom: 0;
 }
 .block-menustruct {
 	background-color: #fff;
@@ -104,7 +121,7 @@ i.unicode-fas:before {
     position: fixed;
     color: #444;
     padding: 30px;
-    font-size: 1em;
+    font-size: 0.9em;
     text-align: center;
 }
 .jsgrid-grid-body {
@@ -182,11 +199,39 @@ i.unicode-fas:before {
     border-right-color: #71AFFF;
     border-bottom-color: #C1C1C1;    
 }
+.mmcp-box-top {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+}
 .mmcp-hide {
     display: none;
 }
+.mmcp-items-highlight { 
+    height: 46px; 
+    display: inline-block; 
+    line-height: 1.2em; 
+    background: #EEEEEE; 
+    border: 2px dotted #CCCCCC; 
+    width: 100% ;
+    margin: 5px 0 0;
+}
+.mmcp-column-highlight {
+    display: inline-block;
+    background: #EEEEEE; 
+    border: 2px dotted #CCCCCC; 
+    float: left;
+    width: 20%;
+    height: 100px;
+}
+.mmcp-tab-content {
+    width: 100%;
+    clear: both;
+    margin: 10px 0 0;
+}
 .row-botton {
     margin: 20px 0 0;
+    float: right;
 }
 .mmcp_select select{
     height: auto;
@@ -208,4 +253,96 @@ i.unicode-fas:before {
 }
 .block-menustruct .menu-item-bar .menu-item-handle{
     width: auto;
+}
+.customlinkdiv label.howto {
+    width: auto;
+}
+#menu-management .inside{
+    margin-top: 10px;
+}
+.customlinkdiv .menu-item-textbox {
+    width: 90%;
+}
+.mmcpcontent, .box-addrow {
+    display: block;
+    width: 100%;
+}
+.mmcpcontent .mmcp-box-action{
+    text-align: left;
+    display: block;
+    padding: 0 5px 5px;
+}
+.mmcp-box-bottom {
+    display: block;
+    overflow: hidden;
+}
+.mmcp-box-action > span {
+    cursor: move;
+}
+.mmcp-item-widget{
+    cursor: move;
+    padding: 5px 20px;
+}
+.mmcp-grid-wrapper {
+    margin: 20px 0 10px;
+    display: block;
+}
+.mmcp-widget {
+    display: block;
+    min-height: 46px;
+   /*background-color: #f6f6f6;
+    border: 1px solid #4444;*/
+    text-align: left;
+    position: relative;
+    padding: 0px;
+    margin: 5px 0 0;
+    cursor: move;
+}
+.mmcp-widget-title {
+    text-align: left;
+}
+.mmcp-widget-action{
+    position: absolute;
+    top: 28%;
+    right: 3%;
+    width: 20px;
+    height: 20px;
+    display: block;
+    overflow: hidden;
+    vertical-align: middle;
+    font-size: 16px;
+    line-height: 20px;
+    cursor: pointer;
+}
+.mmcp-add_column {
+    float: right;
+}
+.mmcp-grid-row {
+    background-color: #f6f6f6;
+    border: 1px solid #4444;
+    padding: 10px 5px;
+    overflow: hidden;
+    display: block;
+    margin: 0 0 10px;
+}
+.mmcp-grid-col {
+    min-height: 50px;
+    display: inline-block;
+    float: left;
+}
+.mmcp-col-content {
+    border: 1px solid #4444;
+    background-color: #fff;
+    padding: 10px;
+    margin: 5px;
+    min-height: 40px;
+}
+.mmcp-col-content-widget {
+    min-height: 40px;
+}
+.mmcp-col-4 {
+    width: 33%;
+}
+.mmcp-col-3 {
+    width: 24.99%;
 }

@@ -20,8 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</button>
 	  </div>
 	  <div class="modal-body">
-	  	<p><?php _e('Are you sure about this ?') ?></p>
-	  	<p class="item_name_category"></p>
+		    <p  class="text-danger"><?php _e('Are you sure about this ?') ?></p>
+		    <p class="item_name_category"></p>
 	  </div>
 	  <div class="modal-footer">
 		<button type="button" class="btn btn-secondary" data-dismiss="modal"><?php _e('No') ?></button>

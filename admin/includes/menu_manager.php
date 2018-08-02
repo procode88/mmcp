@@ -227,6 +227,7 @@ if (!class_exists('Menu_Manager'))
 	        wp_nav_menu_setup();
 	        wp_initial_nav_menu_meta_boxes();
 	        wp_enqueue_script('nav-menu');
+	        $all_register_widget_items = MMCP_Manager_Widget::instance()->get_all_items_register_widget();
 			if ( wp_is_mobile() )
 				wp_enqueue_script( 'jquery-touch-punch' );   
 			wp_localize_script( 'nav-menu', 'menus', $nav_menus_l10n );

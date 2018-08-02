@@ -49,19 +49,35 @@
 						<div class="col-10 tab-content">
 							<div class="tab-content" style="height:auto">
 								<div class="tab-pane fade active show" style="height: auto" id="mmcpPages">
-									Pages
+									
 								</div>
 								<div class="tab-pane fade" id="mmcpPosts">
-									Posts
+									
 								</div>
 								<div class="tab-pane fade" id="mmcpCategories">
-									Categories
+									
 								</div>
 								<div class="tab-pane fade" id="mmcpTags">
-									Tags
+									
 								</div>
 								<div class="tab-pane fade" id="mmcpCustomlinks">
-									Custom Links
+									<?php $_nav_menu_placeholder = -1; ?>
+									<!--span class="spinner"></span-->
+									<div class="inside">
+										<div class="customlinkdiv" id="customlinkdiv">
+											<input type="hidden" value="custom" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-type]" />
+											<p id="menu-item-url-wrap" class="wp-clearfix">
+												<label class="howto" for="custom-menu-item-url"><?php _e( 'URL' ); ?></label>
+												<input id="custom-menu-item-url" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-url]" type="text" class="code menu-item-textbox" value="http://" />
+											</p>
+
+											<p id="menu-item-name-wrap" class="wp-clearfix">
+												<label class="howto" for="custom-menu-item-name"><?php _e( 'Link Text' ); ?></label>
+												<input id="custom-menu-item-name" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-title]" type="text" class="regular-text menu-item-textbox" />
+											</p>
+											<input type="hidden"<?php wp_nav_menu_disabled_check( $nav_menu_selected_id ); ?> value="<?php esc_attr_e('Add to Menu'); ?>" name="add-custom-menu-item" />
+										</div>
+									</div>									
 								</div>
 							</div>
 						</div>
@@ -69,9 +85,6 @@
 					<div class="row">
 						<div class="col-12 ">
 							<div class="row-botton">
-								<div class="box_spinner">
-									
-								</div>
 								<span class="spinner" style="float: none;"></span>
 								<button type="button" class="btn btn-primary addtomenu"><?php _e('Add To Menu')?></button>
 								<button type="button" class="btn btn-secondary mmcp-close">
