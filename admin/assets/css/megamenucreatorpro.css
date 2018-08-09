@@ -47,11 +47,64 @@ div.mmco-wrapper {
     overflow: hidden;
     background: #f5f5f5;
 }
+.block-menu-items #menu-management form.mmcp-form-options {
+    margin-top: 0;
+}
+.mmcp-align-left {
+    text-align: left;
+}
+.mmcp-form-options h6 {
+    border-bottom: 1px solid #4444;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.mmcp-box-widget, .mmcp-box-typeitem {
+    min-height: 400px;
+    height: 100%;
+    border-right: 1px solid rgba(0, 0, 0, 0.15);
+}
+.mmcp-form-options input[type=checkbox] {
+    margin-left:0;
+}
+.mmcp-messages {
+    text-align: left;
+}
+.block_mmcp_files {
+    position: relative;
+    margin-top: 10px;
+}
+.block_mmcp_files img {
+    width: 100%;
+    height: auto;
+}
+.mmcp_delete_img_upload {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 26px;
+    height: 26px;
+    display: none;
+    line-height: 25px;
+    background-color: #fff;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 50%;
+}
+.block_mmcp_files:hover .mmcp_delete_img_upload {
+    display: block;
+}
+.block-menu-items #menu-management form.mmcp-form-config, .block-menu-items #menu-management form.mmcp-form-options {
+    background: transparent;
+}
 .block-menu-items #menu-management form.mmcp_widget_form {
     background: transparent;
 }
 .block-menu-items #menu-management form.mmcp_widget_form label {
     margin-bottom: 0;
+}
+.modal-dialog form.mmcp-form-config input[type=checkbox] {
+    margin-top: .3rem;
+    margin-left: -1.25rem;
 }
 .block-menustruct {
 	background-color: #fff;
@@ -164,7 +217,6 @@ i.unicode-fas:before {
 }
 .aside-content .nav-tabs {
     border-bottom: 0;
-    border-right: 1px solid rgba(0, 0, 0, 0.15);
 }
 .aside-content .nav-tabs > li {
     margin-bottom: 0;
@@ -276,7 +328,32 @@ i.unicode-fas:before {
     display: block;
     overflow: hidden;
 }
-.mmcp-box-action > span {
+.mmcp-padding-top {
+    padding-top: 10px;
+}
+.modal {
+    z-index: 99999;
+}
+.modal-backdrop {
+    z-index: 99998;
+}
+ul.mmcp-list-widget {
+    max-height: 400px;
+    overflow-y: scroll;
+}
+span.mmcp-settings-row, span.mmcp-settings-column, span.mmcp-delete-row, span.mmcp-delete-column {
+    cursor: pointer;
+}
+span.mmcp-delete-row, span.mmcp-delete-column {
+    margin-left: 10px;
+}
+span.mmcp-delete-row.active, span.mmcp-delete-column.active {
+    color: red;
+}
+span.mmcp-settings-row.active, span.mmcp-settings-column.active {
+    color: red;
+}
+.mmcp-box-action > span.mmcp-icon-sort-column  {
     cursor: move;
 }
 .mmcp-item-widget{

@@ -16,19 +16,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$index_id = 0;
 				foreach($sub_layout['sub_layout'] as $key => $item) {
 					$this->get_max_element_id($item['id'], $row_max_id);
-					if($item['type'] == 'row') {
+					if($item['type'] == self::DEFAULT_TYPE_ROW) {
 					?>
 					<div class="mmcp-grid-row" id="<?php echo $item['id']?>">
+						<input type="hidden" name="row[<?php echo $item['id']?>][width]" value="<?php echo $this->get_config_value($item, 'width')?>"/>
+						<input type="hidden" name="row[<?php echo $item['id']?>][class]" value="<?php echo $this->get_config_value($item, 'class') ?>" />
+						<input type="hidden" name="row[<?php echo $item['id']?>][hide_on_mobile]" value="<?php echo $this->get_config_value($item, 'hide_on_mobile')?>"/>
+						<input type="hidden" name="row[<?php echo $item['id']?>][hide_on_desktop]" value="<?php echo $this->get_config_value($item, 'hide_on_desktop')?>" />						
 						<div class="mmcp-box-action">
 							<span class="mmcp-icon-sort-column">
 								<i class="fas fa-sort"></i>
 								<?php _e('Row') ?>
 							</span>
+							<span title="config row id <?php echo $item['id']?>" class="mmcp-settings-row" >
+								<i class="fas fa-cog"></i>
+							</span>
+							<span title="delete row id <?php echo $item['id']?>" class="mmcp-delete-row">
+								<i class="fas fa-trash-alt"></i>
+							</span>							
 							<button class="mmcp-add_column btn btn-default btn-sm" type="button">
 								<span class="mmcp-add-column">
 									<i class="fas fa-plus-circle"></i>
 									<?php _e('Column') ?>
 								</span>
+
 							</button>
 							<div class="clear"></div>
 						</div>
@@ -37,14 +48,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 								$column_max_id = 0;
 								foreach($item['data'] as $_key => $_item) {
 									$this->get_max_element_id($_item['id'], $column_max_id);
-									if ($_item['type'] == 'column') {
+									if ($_item['type'] == self::DEFAULT_TYPE_COLUMN) {
 									?>
-										<div id="<?php echo $_item['id']?>" class="mmcp-grid-col mmcp-col-<?php echo $this->get_config_width_value($_item, 0)?>">
+										<div id="<?php echo $_item['id']?>" class="mmcp-grid-col mmcp-col-<?php echo $this->get_config_value($_item, 'width')?>">
+											<input type="hidden" name="column[<?php echo $_item['id']?>][width]" value="<?php echo $this->get_config_value($_item, 'width')?>"/>
+											<input type="hidden" name="column[<?php echo $_item['id']?>][class]" value="<?php echo $this->get_config_value($_item, 'class') ?>" />
+											<input type="hidden" name="column[<?php echo $_item['id']?>][hide_on_mobile]" value="<?php echo $this->get_config_value($_item, 'hide_on_mobile')?>"/>
+											<input type="hidden" name="column[<?php echo $_item['id']?>][hide_on_desktop]" value="<?php echo $this->get_config_value($_item, 'hide_on_desktop')?>" />			
 											<div class="mmcp-col-content">
 												<div class="mmcp-box-action column-action">
 													<span class="mmcp-icon-sort-column">
 														<i class="fas fa-arrows-alt"></i>
 														<?php _e('Column') ?>
+													</span>
+													<span title="config column id <?php echo $_item['id']?>" class="mmcp-settings-column" >
+														<i class="fas fa-cog"></i>
+													</span>
+													<span title="delete column id <?php echo $_item['id']?>" class="mmcp-delete-column">
+														<i class="fas fa-trash-alt"></i>
 													</span>
 												</div>
 												<div class="mmcp-col-content-widget">
@@ -53,7 +74,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 													foreach($_item['data'] as $__item) {
 														$index_id++;
 														$this->get_max_element_id($__item['id'], $item_max_id);
-														if($__item['type'] == 'item' && $__item['cate'] == 'widget') { ?>
+														if($__item['type'] == self::DEFAULT_TYPE_ITEM && $__item['cate'] == 'widget') { ?>
 															<div class="mmcp-widget widget" id="<?php echo $__item['id']?>" data-wgorder="<?php echo $__item['order']?>" data-typeitem="<?php echo $__item['cate']?>">
 																<div class="widget-top">
 																	<div class="widget-title-action">
@@ -93,6 +114,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 														                    <div class="mmcp-item-loading"></div>
 														                    <div class="clear"></div>
 																		</div>
+																	</form>
+																</div>
+															</div>
+														<?php } elseif($__item['type'] == self::DEFAULT_TYPE_ITEM && $__item['cate'] == self::MENU_ITEM) { ?>
+															<div class="mmcp-widget widget" id="<?php echo $__item['id']?>" data-wgorder="<?php echo $__item['order']?>" data-typeitem="<?php echo $__item['cate']?>">
+																<div class="widget-top">
+																	<div class="widget-title">
+																		<h3><?php echo  $old_sub_menu_item[$__item['cate_id']]['title'] ; ?><span class="in-widget-title"></span></h3>
+																	</div>
+																</div>
+																<div class="widget-inner widget-inside">
+																	<form method='post'  class="mmcp_widget_form">
+																		<input type="hidden" name="widget-id" class="widget-id" value="<?php echo $__item['cate_id'] ?>" />
 																	</form>
 																</div>
 															</div>

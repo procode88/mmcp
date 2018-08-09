@@ -17,6 +17,13 @@ if (!class_exists('MMCP_Manager_Widget'))
         const DEFAULT_TYPE_COLUMN = 'column';
         const DEFAULT_TYPE_ROW = 'row';
         const DEFAULT_CATE_ITEM = 'widget';
+        const OFF_HIDE_MOBILE = 0;
+        const OFF_HIDE_DESKTOP = 0;
+        const ON_HIDE_MOBILE = 1;
+        const ON_HIDE_DESKTOP = 1;
+        const DEFAULT_VALUE_OFF = 0;
+        const DEFAULT_VALUE_ON = 1;
+        const MENU_ITEM = 'nav_menu_item';
 
 		protected static $_instance = null;
 
@@ -42,6 +49,8 @@ if (!class_exists('MMCP_Manager_Widget'))
             add_action('wp_ajax_mmcp_sort_column_layout', array($this, 'mmcp_sort_column_layout'));
             add_action('wp_ajax_mmcp_add_row_layout', array($this, 'mmcp_add_row_layout'));
             add_action('wp_ajax_mmcp_sort_row_layout', array($this, 'mmcp_sort_row_layout'));
+            add_action('wp_ajax_mmcp_save_config', array($this, 'mmcp_save_config'));
+            add_action('wp_ajax_mmcp_save_options_icon', array($this, 'mmcp_save_options_icon'));
 		}
 
         /**
@@ -55,6 +64,191 @@ if (!class_exists('MMCP_Manager_Widget'))
                 array_push($widgets, array('name' => $widget->name, 'id_base' => $widget->id_base));
             }
             return $widgets;
+        }
+
+        public function mmcp_save_options_icon() {
+            check_ajax_referer('mmcp_check_ajax_save_options_icon', 'mmcp_save_options_icon_noce');
+            $menu_id = $this->mmcp_get_request('menu_id');
+            $menu_item_id = $this->mmcp_get_request('menu_item_id');
+            $hide_text = isset($_POST['mmcp_hidetext']) ? self::DEFAULT_VALUE_ON : self::DEFAULT_VALUE_OFF;
+            $hide_arrow = isset($_POST['mmcp_hidearrow']) ? self::DEFAULT_VALUE_ON : self::DEFAULT_VALUE_OFF;
+            $disable_link = isset($_POST['mmcp_disablelink']) ? self::DEFAULT_VALUE_ON : self::DEFAULT_VALUE_OFF;
+            $hide_on_mobile = isset($_POST['mmcp_hide_on_mobile']) ? self::DEFAULT_VALUE_ON : self::DEFAULT_VALUE_OFF;
+            $hide_on_desktop = isset($_POST['mmcp_hide_on_desktop']) ? self::DEFAULT_VALUE_ON : self::DEFAULT_VALUE_OFF;
+            $item_align = $this->mmcp_get_request('mmcp_item_alignment');
+            $icon_position = $this->mmcp_get_request('mmcp_icon_position');
+            $badge_text = $this->mmcp_get_request('mmcp_badge_text');
+            $badge_type = $this->mmcp_get_request('mmcp_badgetype');
+            $submenu_align = $this->mmcp_get_request('mmcp_submenu_align');
+            $custom_class_sub = $this->mmcp_get_request('mmcp_custom_class');
+            $width_submenu = $this->mmcp_get_request('mmcp_width_submenu');
+            $hide_submenu_mobile = isset($_POST['mmcp_hide_submenu_on_mobile']) ? self::DEFAULT_VALUE_ON : self::DEFAULT_VALUE_OFF;
+            $background_img_sub_menu = $this->mmcp_get_request('mmcp_background_upload_img');
+            if ($menu_item_id) {
+                $sub_layout = get_post_meta($menu_item_id, 'mmcp_sub_layout', true);
+            } else {
+                wp_send_json_error(array('message' => __('Could\'t save config data', 'mmcp')));
+            }
+            if (is_array($sub_layout)) {
+                $config_array = array('hide_text' => $hide_text, 'hide_arrow' => $hide_arrow, 'disable_link' => $disable_link, 'hide_on_mobile' => $hide_on_mobile, 'hide_on_desktop' => $hide_on_desktop, 'item_align' => $item_align, 'icon_position' => $icon_position, 'badge_text' => $badge_text, 'badge_type' => $badge_type, 'dropdown_align' => $submenu_align, 'hide_sub_menu_on_mobile' => $hide_submenu_mobile, 'custom_class' => $custom_class_sub, 'width_submenu' => $width_submenu, 'background_image_submenu' => $background_img_sub_menu);
+                
+                $this->set_data_options($sub_layout, $config_array);
+                update_post_meta($menu_item_id, 'mmcp_sub_layout', $sub_layout);
+                wp_send_json_success(array('message' => __('save config data success!', 'mmcp')));
+            } else {
+                wp_send_json_error(array('message' => __('Could\'t save config data', 'mmcp')));
+            }
+
+        }
+
+        /**
+         * Get Item Align Data
+         * @return Array
+         */
+        protected function get_item_align_data() {
+            return array('left' =>  __('Left', 'mmcp'), 'right' =>  __('Right', 'mmcp'), 'center' =>  __('Center', 'mmcp'));
+        }
+
+        /**
+         * Get Sub Menu Align Data
+         * @return Array
+         */
+        protected function get_submenu_align_data() {
+            return array('left' =>  __('Left', 'mmcp'), 'right' =>  __('Right', 'mmcp'));
+        }        
+
+        /**
+         * Get Icon Position Data
+         * @return Array
+         */
+        protected function get_icon_position_data() {
+            return array('left' =>  __('Left', 'mmcp'), 'right' =>  __('Right', 'mmcp'), 'top' =>  __('Top', 'mmcp'));
+        }
+
+        /**
+         * Get Badge Type Data
+         * @return Array
+         */
+        protected function get_badge_type_data() {
+            return array('default' =>  __('Default', 'mmcp'), 'primary' =>  __('Primary', 'mmcp'), 'secondary' =>  __('Secondary', 'mmcp'), 'success' =>  __('Success', 'mmcp'), 'danger' =>  __('Danger', 'mmcp'), 'warning' =>  __('Warning', 'mmcp'), 'info' =>  __('Info', 'mmcp'));
+        }
+
+        /**
+         * Get Col Width Data
+         * @return Array
+         */
+        protected function get_col_width_data() {
+            return array('1' =>  __('col-1', 'mmcp'), '2' =>  __('col-2', 'mmcp'), '3' =>  __('col-3', 'mmcp'), '4' =>  __('col-4', 'mmcp'), '5' =>  __('col-5', 'mmcp'), '6' =>  __('col-6', 'mmcp'), '7' =>  __('col-7', 'mmcp'), '8' =>  __('col-8', 'mmcp'), '9' =>  __('col-9', 'mmcp'), '10' =>  __('col-10', 'mmcp'), '11' =>  __('col-11', 'mmcp'), '12' =>  __('col-12', 'mmcp'), 'full' =>  __('Full Width', 'mmcp'));
+        }
+
+        /**
+         * Save Config for row and column
+         *
+         */
+        public function mmcp_save_config() {
+            check_ajax_referer('mmcp_check_ajax_save_config_data', 'mmcp_save_config_data_noce');
+            $menu_id = $this->mmcp_get_request('menu_id');
+            $menu_item_id = $this->mmcp_get_request('menu_item_id');
+            $row_id = $this->mmcp_get_request('row_id');
+            $width = $this->mmcp_get_request('width');
+            $class = $this->mmcp_get_request('class');
+            $hide_on_mobile = isset($_POST['mmcp_hide_on_mobile']) ? self::ON_HIDE_MOBILE : self::OFF_HIDE_MOBILE;
+            $hide_on_desktop = isset($_POST['mmcp_hide_on_desktop']) ? self::ON_HIDE_DESKTOP : self::OFF_HIDE_DESKTOP;
+            $type = $this->mmcp_get_request('type');
+            if ($menu_item_id) {
+                $sub_layout = get_post_meta($menu_item_id, 'mmcp_sub_layout', true);
+            } else {
+                wp_send_json_error(array('message' => __('Could\'t save config data', 'mmcp')));
+            }
+
+            if (!$row_id || !$type) {
+                wp_send_json_error(array('message' => __('Could\'t save config data', 'mmcp')));
+            }
+            if (is_array($sub_layout)) {
+                if (isset($sub_layout['sub_layout'])) {
+                    $layout = $sub_layout['sub_layout'];
+                    $index_row = null;
+                    if(count($layout)) {
+                        if ($type == 'column') {
+                            $index_column = null;
+                            $column_id = $this->mmcp_get_request('column_id');
+                            if (!$column_id) {
+                                wp_send_json_error(array('message' => __('Could\'t save config data', 'mmcp')));
+                            }
+                            $this->get_data_item_column($layout, $index_row, $index_column, $row_id, $column_id);
+                            $row_data = $layout[$index_row];
+                            $column_data = $row_data['data'][$index_column];
+                            $this->set_data_config($column_data, array('width' => $width, 'class' => $class, 'hide_on_mobile' => $hide_on_mobile, 'hide_on_desktop' => $hide_on_desktop));
+                            $sub_layout['sub_layout'][$index_row]['data'][$index_column] = $column_data;
+                        } else {
+                            $this->get_data_column_row($layout, $index_row, $row_id);
+                            $row_data = $layout[$index_row];
+                            $this->set_data_config($row_data, array('width' => $width, 'class' => $class, 'hide_on_mobile' => $hide_on_mobile, 'hide_on_desktop' => $hide_on_desktop));
+                            $sub_layout['sub_layout'][$index_row] = $row_data;
+                        }
+                        update_post_meta($menu_item_id, 'mmcp_sub_layout', $sub_layout);
+                        wp_send_json_success(array('message' => __('save config data success!', 'mmcp')));
+                    } else {
+                        wp_send_json_error(array('message' => __('Could\'t save config data', 'mmcp')));
+                    }
+                } else {
+                    wp_send_json_error(array('message' => __('Could\'t save config data', 'mmcp')));
+                }
+            } else {
+                wp_send_json_error(array('message' => __('Could\'t save config data', 'mmcp')));
+            }
+        }
+
+        /**
+         * Set data options
+         * 
+         * @param Array $item
+         * @param Array $fieldsValue
+         * @return void
+         */
+        protected function set_data_options(&$item, $fieldsValue = array()) {
+            try {
+                if (is_array($item)) {
+                    foreach($fieldsValue as $field => $value) {
+                        if (isset($item[$field])) {
+                            $item[$field] = $value;
+                        } else {
+                            throw new Exception("Error Not save config data", 1);
+                        }
+                    }
+                } else {
+                    throw new Exception("Error Not save config data", 1);
+                }
+            } catch (Exception $e) {
+                $error = 'Caught exception: '.$e->getMessage()."\n";
+                wp_send_json_error(array('message' => __($error)));
+            }
+        }
+
+        /**
+         * Set data config
+         * 
+         * @param Array $item
+         * @param Array $fieldsValue
+         * @return void
+         */
+        protected function set_data_config(&$item, $fieldsValue = array()) {
+            try {
+                if (is_array($item) && isset($item['config'])) {
+                    foreach($fieldsValue as $field => $value) {
+                        if (isset($item['config'][$field])) {
+                            $item['config'][$field] = $value;
+                        } else {
+                            throw new Exception("Error Not save config data", 1);
+                        }
+                    }
+                } else {
+                    throw new Exception("Error Not save config data", 1);
+                }
+            } catch (Exception $e) {
+                $error = 'Caught exception: '.$e->getMessage()."\n";
+                wp_send_json_error(array('message' => __($error)));
+            }
         }
 
         /**
@@ -752,7 +946,7 @@ if (!class_exists('MMCP_Manager_Widget'))
                         $last_item_index = $columns_data['max_item'];
                         $item_id = $last_item_index + 1;
                         $order_status = false;
-                        $item_obj = array('id' => "item_{$menu_item_id}_{$row_id_number}_{$column_id_number}_{$item_id}", 'type' => 'item', 'order' => $current_index_item, 'cate' => $type_item, 'cate_id' => "{$widget_id}-{$next_widget_id}");
+                        $item_obj = array('id' => "item_{$menu_item_id}_{$row_id_number}_{$column_id_number}_{$item_id}", 'type' => self::DEFAULT_TYPE_ITEM, 'order' => $current_index_item, 'cate' => $type_item, 'cate_id' => "{$widget_id}-{$next_widget_id}");
                         foreach ($columns_data['data'] as $key => $value) {
                             if ($value['type'] == self::DEFAULT_TYPE_ITEM) {
                                 if ($value['order'] == $current_index_item && !$has_update) {
@@ -780,65 +974,6 @@ if (!class_exists('MMCP_Manager_Widget'))
                         $sub_layout['sub_layout'][$index_row]['data'][$index_column]['data'] = $new_column_data;
                         update_post_meta($menu_item_id, 'mmcp_sub_layout', $sub_layout);
                         wp_send_json_success(array('message' => __('Add widget success!', 'mmcp')));
-        				/*foreach($layout as $key => $value) {
-        					if ($value['type'] == 'row' && $value['id'] == $row_id) {
-    							$row_exists = true;
-    							$index_row = $key;
-    							break;
-        					}
-        				}
-        				if ($row_exists && $index_row !== null) {
-        					$row_data = $layout[$index_row];
-        					foreach ($row_data['data'] as $key => $value) {
-        						if ($value['type'] == 'column' && $value['id'] == $column_id) {
-									$column_exists = true;
-									$index_column = $key;
-									break;
-        						}
-        					}
-        					if($column_exists && $index_column !== null) {
-					            $widget_option = get_option("widget_{$widget_id}");
-					            $widget_option[$next_widget_id] = array();
-					            update_option("widget_{$widget_id}", $widget_option);
-        						$columns_data = $row_data['data'][$index_column];
-        						$item_id = $last_item_index + 1;
-        						$row_id_number = array_pop($row_idarr);
-        						$column_id_number = array_pop($column_idarr);
-        						$item_obj = array('id' => "item_{$menu_item_id}_{$row_id_number}_{$column_id_number}_{$item_id}", 'type' => 'item', 'order' => $current_index_item, 'cate' => $type_item, 'cate_id' => "{$widget_id}-{$next_widget_id}");
-        						$data_item = array();
-        						$data_element_diff = array();
-        						$new_column_data = array();
-        						$__order = 0;
-        						foreach ($columns_data['data'] as $key => $value) {
-        							if ($value['type'] == 'item') {
-        								if ($value['order'] == $current_index_item && !$has_update) {
-        									array_push($data_item, $item_obj);
-        									$has_update = true;
-        								}
-        								$value['order'] = $__order;
-        								if($has_update) {
-        									$value['order'] = $__order + 1;
-        								}
-        								$__order++;
-        								array_push($data_item, $value);
-        							} else {
-        								array_push($data_element_diff, $value);
-        							}
-        						}
-        						if (!$has_update) {
-        							array_push($data_item, $item_obj);
-        						}
-        						usort($data_item, array($this, 'mmcp_sort_array'));
-        						$new_column_data = array_merge($data_item, $data_element_diff);
-        						$sub_layout['sub_layout'][$index_row]['data'][$index_column]['data'] = $new_column_data;
-        						update_post_meta($menu_item_id, 'mmcp_sub_layout', $sub_layout);
-        						wp_send_json_success(array('message' => __('Add widget success!')));
-        					} else {
-        						wp_send_json_error(array('message' => __('Could\'t add widget item')));
-        					}
-        				} else {
-							wp_send_json_error(array('message' => __('Could\'t add widget item')));
-        				}*/
         			} else {
 						wp_send_json_error(array('message' => __('Could\'t add widget item', 'mmcp')));
         			}
@@ -901,7 +1036,7 @@ if (!class_exists('MMCP_Manager_Widget'))
          */
         protected function mmcp_get_widget_name($item) {
         	try {
-	        	if ($item['type'] == 'item' && $item['cate'] == 'widget' && isset($item['cate_id'])) {
+	        	if ($item['type'] == self::DEFAULT_TYPE_ITEM && $item['cate'] == 'widget' && isset($item['cate_id'])) {
 	        		return $this->mmcp_get_widget_name_by_widget_id($item['cate_id']);
 	        	} else {
 	        		throw new Exception("Error Item not widget");
@@ -934,6 +1069,30 @@ if (!class_exists('MMCP_Manager_Widget'))
         }
 
         /**
+         * @param Array $item
+         * @param String $field
+         * @param int $type
+         * @return String
+         */
+        protected function get_config_value($item, $field, $type = 0) {
+            try {
+                if (isset($item['config']) && isset($item['config'][$field])) {
+                    $value = $item['config'][$field];
+                    if ($field == 'width') {
+                        $default = $type ? self::DEFAULT_ROW_WIDTH : self::DEFAULT_COLUMN_WIDTH;
+                        $value = $value ? $value : $default;
+                    }
+                    return $value;
+                } else {
+                    throw new Exception("Error Not get value of field");
+                }           
+            } catch (Exception $e) {
+                $error = 'Caught exception: '.$e->getMessage()."\n";
+                wp_die($error);
+            }
+        }
+
+        /**
 		 * @param string $id
          * @param int $old_id
 		 * @return void
@@ -951,10 +1110,11 @@ if (!class_exists('MMCP_Manager_Widget'))
          * @param int $menu_item_id
          * @return Array
          */
-        protected function get_struct_data_column($menu_item_id, $row_id, $index) {
+        protected function get_struct_data_column($menu_item_id, $row_id, $index, $type = null) {
+            $element_type = isset($type) ? $type : self::DEFAULT_TYPE_COLUMN;
             $column_data = array(
-                'type' => 'column',
-                'id' => "column_{$menu_item_id}_{$row_id}_{$index}",
+                'type' => $element_type,
+                'id' => "{$element_type}_{$menu_item_id}_{$row_id}_{$index}",
                 'order' => 0,
                 'max_item' => 0,
                 'config' => array(
@@ -975,10 +1135,12 @@ if (!class_exists('MMCP_Manager_Widget'))
          * @param int $menu_item_id
          * @return Array
          */
-        protected function get_struct_data_row($menu_item_id, $index) {
+        protected function get_struct_data_row($menu_item_id, $index, $type = null, $type1 = null) {
+            $element_type = isset($type) ? $type : self::DEFAULT_TYPE_ROW;
+            $element_type2 = isset($type1) ? $type1 : self::DEFAULT_TYPE_COLUMN;
             $row_data = array(
-                'type' => 'row',
-                'id' => "row_{$menu_item_id}_{$index}",
+                'type' => $element_type,
+                'id' => "{$element_type}_{$menu_item_id}_{$index}",
                 'order' => 0,
                 'max_column' => 1,
                 'config' => array(
@@ -989,10 +1151,33 @@ if (!class_exists('MMCP_Manager_Widget'))
                 ),
                 'data' => array()
             );
-            $column_data = $this->get_struct_data_column($menu_item_id, $index, 1);
+            $column_data = $this->get_struct_data_column($menu_item_id, $index, 1, $element_type2);
             array_push($row_data['data'], $column_data);
 
             return $row_data;
+        }
+
+        /**
+         * Get length row
+         * @param array $item
+         * @return Array
+         */
+        protected function get_last_index_array_data($items, $type) {
+            if (is_array($items)) {
+                $length = 0;
+                $index= 0;
+                foreach($items as $key => $value) {
+                    if ($value['type'] == $type) {
+                        $index = $key;
+                        $length++;
+                    }
+                }
+                if ($length) {
+                    return array('length' => $length, 'index' => $index);
+                }
+                return array();
+            }
+            return array();
         }
 
         /**
@@ -1004,9 +1189,29 @@ if (!class_exists('MMCP_Manager_Widget'))
         	$menu_item_depth = $this->mmcp_get_request('menu_item_depth');
         	$menu_item_id = $this->mmcp_get_request('menu_item_id');
         	$reload_layout = $this->mmcp_get_request('reload_layout');
-        	$sub_layout = get_post_meta($menu_item_id, 'mmcp_sub_layout', true);
+            if ($menu_item_id) {
+                $sub_layout = get_post_meta($menu_item_id, 'mmcp_sub_layout', true);
+            }
+            $sub_menu_item = array();
+            $old_sub_menu_item = array();
+            if (is_nav_menu( $menu_id )) {
+                $menu = wp_get_nav_menu_items( $menu_id );
+                if ( count( $menu ) ) {
+                    foreach ( $menu as $item ) {
+                        if ( $item->menu_item_parent == $menu_item_id ) {
+                            $_item = array('cate' => self::MENU_ITEM, 'cate_id' => $item->ID, 'title' => $item->title);
+                            array_push($sub_menu_item, $_item);
+                            $old_sub_menu_item[$item->ID] = $_item;
+                        }
+                    }
+                }
+            }
+
         	if (!is_array($sub_layout)) {
                 $sub_layout = array(
+                    'hide_text' => 0,
+                    'hide_arrow' => 0,
+                    'disable_link' => 0,
                     'custom_class' => '',
                     'width_submenu' => '',
                     'background_image_submenu' => '',
@@ -1018,60 +1223,138 @@ if (!class_exists('MMCP_Manager_Widget'))
                     'hide_sub_menu_on_mobile' => 0,
                     'icon' => '',
                     'icon_position' => 'left',
+                    'badge_text' => '',
+                    'badge_type' => 'mmcp_badge-primary',
                     'max_row' => '1',
                     'sub_layout' => array()
                 );
                 $row_struct_data = $this->get_struct_data_row($menu_item_id, 1);
+                $column_data = $row_struct_data['data'][0];
+                $max_item = $column_data['max_item'] + 1;
+                if (count($sub_menu_item)) {
+                    $data_item = array();
+                    $item_key = "item_{$menu_item_id}_1_1_";
+                    $order = 0;
+                    foreach ($sub_menu_item as $value) {
+                        array_push($data_item, array('id' => $item_key.$max_item, 'order' => $order, 'type' => self::DEFAULT_TYPE_ITEM, 'cate' => $value['cate'], 'cate_id' => $value['cate_id']));
+                        $column_data['max_item'] = $max_item;
+                        $max_item++;
+                        $order++;
+                    }
+                    $column_data['data'] = $data_item;
+                    $row_struct_data['data'][0] = $column_data;
+                }
                 array_push($sub_layout['sub_layout'], $row_struct_data);
-        		/*$sub_layout = array(
-        			'custom_class' => '',
-        			'width_submenu' => '',
-        			'background_image_submenu' => '',
-        			'effect' => '',
-        			'hide_on_mobile' => 0,
-        			'hide_on_desktop' => 0,
-        			'item_align' => 'left',
-        			'dropdown_align' => 'right',
-        			'hide_sub_menu_on_mobile' => 0,
-        			'icon' => '',
-        			'icon_position' => 'left',
-                    'max_row' => '1',
-        			'sub_layout' => array(
-        				array(
-        					'type' => 'row',
-        					'id' => "row_{$menu_item_id}_1",
-        					'order' => 0,
-                            'max_column' => 1,
-        					'config' => array(
-        						'width' => '',
-        						'class' => '',
-        						'hide_on_mobile' => 0,
-        						'hide_on_desktop' => 0
-        					),
-        					'data' => array(
-        						array(
-        							'type' => 'column',
-        							'id' => "column_{$menu_item_id}_1_1",
-        							'order' => 0,
-                                    'max_item' => 1,
-        							'config' => array(
-		        						'width' => '',
-		        						'class' => '',
-		        						'hide_on_mobile' => 0,
-		        						'hide_on_desktop' => 0
-        							),
-        							'data' => array()
-        						)
-        					)
-        				)
-        			)
-        		);*/
 				update_post_meta($menu_item_id, 'mmcp_sub_layout', $sub_layout);
-        	}
+        	} else {
+                if (isset($sub_layout['sub_layout']) && count($sub_menu_item)) {
+                    foreach($sub_layout['sub_layout'] as $row) {
+                        if ($row['type'] == self::DEFAULT_TYPE_ROW) {
+                            $columns = $row['data'];
+                            foreach($columns as $column) {
+                                if ($column['type'] == self::DEFAULT_TYPE_COLUMN) {
+                                    $items = $column['data'];
+                                    foreach($items as $item) {
+                                        if ($item['type'] == self::DEFAULT_TYPE_ITEM) {
+                                            foreach ($sub_menu_item as $key => $value) {
+                                                if ($value['cate_id'] == $item['cate_id'] && $value['cate'] == $item['cate']) {
+                                                    unset($sub_menu_item[$key]);
+                                                }
+                                            }
+                                            if(empty($sub_menu_item)) break;
+                                        }
+                                    }
+                                    if(empty($sub_menu_item)) break;
+                                }
+                            }
+                            if(empty($sub_menu_item)) break;
+                        }
+                    }
+                    if (count($sub_menu_item)) {
+                        $max_row = $sub_layout['max_row'];
+                        $arr_row_length_ind = $this->get_last_index_array_data($sub_layout['sub_layout'], self::DEFAULT_TYPE_ROW);
+                        if (!empty($arr_row_length_ind)) {
+                            $index_row = $arr_row_length_ind['index'];
+                            $rowData = $sub_layout['sub_layout'][$index_row];
+                            $max_column = $rowData['max_column'];
+                            $ind_row = array_pop(explode('_', $rowData['id']));
+                            $arr_column_length_ind = $this->get_last_index_array_data($rowData['data'], self::DEFAULT_TYPE_COLUMN);
+                            if (!empty($arr_column_length_ind)) {
+                                $index_column = $arr_column_length_ind['index'];
+                                $columnData = $rowData['data'][$index_column];
+                                $ind_column = array_pop(explode('_', $columnData['id']));
+                                $max_item = $columnData['max_item'];
+                                $key_item = "item_{$menu_item_id}_{$ind_row}_{$ind_column}_";
+                                $data_item = array();
+                                $data_element_diff = array();
+                                $order = 0;
+                                $_new_column_data = array();
+                                foreach($columnData['data'] as $_vl) {
+                                    if ($_vl['type'] == self::DEFAULT_TYPE_ITEM) {
+                                        $_vl['order'] = $order;
+                                        array_push($data_item, $_vl);
+                                        $order++;
+                                    } else {
+                                        array_push($data_element_diff, $_vl);
+                                    }
+                                }
+                                foreach ($sub_menu_item as $key => $value) {
+                                    $max_item++;
+                                    array_push($data_item, array('id' => $key_item.$max_item, 'order' => $order, 'type' => self::DEFAULT_TYPE_ITEM, 'cate' => $value['cate'], 'cate_id' => $value['cate_id']));
+                                    $columnData['max_item'] = $max_item;
+                                    $order++;
+                                }
+                                $_new_column_data = array_merge($data_item, $data_element_diff);
+                                $columnData['data'] = $_new_column_data;
+                                $rowData['data'][$index_column] = $columnData;
+                                $sub_layout['sub_layout'][$index_row] = $rowData;
+                            } else {
+                                //$indexrow = array_pop(explode('_', $rowData['id']));
+                                $columnData = $this->get_struct_data_column($menu_item_id, $index, 1);
+                                $max_item = 0;
+                                $max_column++;
+                                $key_item = "item_{$menu_item_id}_{$ind_row}_{$max_column}_";
+                                $order = 0;
+                                foreach ($sub_menu_item as $key => $value) {
+                                    $max_item++;
+                                    array_push($columnData['data'], array('id' => $key_item.$max_item, 'order' => $order, 'type' => self::DEFAULT_TYPE_ITEM, 'cate' => $value['cate'], 'cate_id' => $value['cate_id']));
+                                    $columnData['max_item'] = $max_item;
+                                    $order++;
+                                }
+                                $rowData['max_column'] = $max_column;
+                                array_push($rowData['data'], $columnData);
+                                $sub_layout['sub_layout'][$index_row] = $rowData;
+                            }
+                            update_post_meta($menu_item_id, 'mmcp_sub_layout', $sub_layout);
+                        } else {
+                            $max_row++;
+                            $row_struct_data = $this->get_struct_data_row($menu_item_id, $max_row);
+                            $column_data = $row_struct_data['data'][0];
+                            $max_item = $column_data['max_item'] + 1;
+                            $data_item = array();
+                            $item_key = "item_{$menu_item_id}_{$max_row}_1_";
+                            $order = 0;
+                            foreach ($sub_menu_item as $value) {
+                                array_push($data_item, array('id' => $item_key.$max_item, 'order' => $order, 'type' => self::DEFAULT_TYPE_ITEM, 'cate' => $value['cate'], 'cate_id' => $value['cate_id']));
+                                $column_data['max_item'] = $max_item;
+                                $max_item++;
+                                $order++;
+                            }
+                            $column_data['data'] = $data_item;
+                            $row_struct_data['data'][0] = $column_data;
+                            array_push($sub_layout['sub_layout'], $row_struct_data);
+                            update_post_meta($menu_item_id, 'mmcp_sub_layout', $sub_layout);
+                        }
+                    }
+                }
+            }
         	echo '<div><div id="ajax_response_layout">';
         	include_once(MMCPRO()->plugin_path().'/admin/views/menus/sub_layout.php');
+            echo '</div>';
         	if ($reload_layout == 2) {
-        		echo '<div id="ajax_response_settings"></div>';
+        		echo '<div id="ajax_response_settings">';
+                include_once(MMCPRO()->plugin_path().'/admin/views/menus/config_options.php');
+                echo '</div>';
         	}
         	echo '</div>';
         	wp_die();

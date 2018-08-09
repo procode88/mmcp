@@ -66,6 +66,22 @@ endforeach;
 						<# }) #>
 					</form>
 				</script>
+				<script id="tmpl-alert-success" type="text/template">
+					<div class="alert alert-success alert-dismissible fade show" role="alert">
+						<strong>{{data.type}}</strong> {{data.message}}
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+				</script>
+				<script id="tmpl-alert-error" type="text/template">
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+						<strong>{{data.type}}</strong> {{data.message}}
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+				</script>
 				<?php 
 					include_once(MMCPRO()->plugin_path().'/admin/views/menus/menu_sidebar.php');
 					include_once(MMCPRO()->plugin_path().'/admin/views/menus/aside_manager_items.php');
@@ -73,7 +89,11 @@ endforeach;
 			</div>
 		</div>
 		<?php 
-			include_once(MMCPRO()->plugin_path().'/admin/views/menus/menu_modal.php');	
+			include_once(MMCPRO()->plugin_path().'/admin/views/menus/menu_modal.php');
+			include_once(MMCPRO()->plugin_path().'/admin/views/menus/confirm_delete_row.php');
+			include_once(MMCPRO()->plugin_path().'/admin/views/menus/confirm_delete_column.php');
+			include_once(MMCPRO()->plugin_path().'/admin/views/menus/modal_config_column.php');
+			include_once(MMCPRO()->plugin_path().'/admin/views/menus/modal_config_row.php');
 		?>
 	</div>
 </div>

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div class="wrap mmcp-wrap">
-	<h1> Mega Menu Creator Pro Settings</h1>
+	<h1><?php _e('Mega Menu Creator Pro Settings', 'mmcp')?></h1>
 	<!--i class="fas fa-address-book"></i>
 	<i class="fas unicode-fas"></i-->
 	<div class="block-menugroup">
